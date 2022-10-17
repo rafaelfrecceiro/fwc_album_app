@@ -106,6 +106,7 @@ class _LoginPageState extends LoginViewImpl {
                       if (isValid) {
                         showLoader();
                         widget.presenter.login(emailEC.text, passwordEC.text);
+                        hideLoader();
                       }
                     },
                     style: context.buttonStyles.yellowButton,

@@ -14,22 +14,33 @@ class StickerFilterGroup extends StatefulWidget {
 }
 
 class _StickerFilterGroupState extends State<StickerFilterGroup> {
+  List<String>? selected = [];
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: SmartSelect.multiple(
+      child: SmartSelect<String>.multiple(
         title: 'Filtro',
         tileBuilder: (context, state) {
           return InkWell(
             onTap: state.showModal,
             child: _StickerGroupTile(
               label: state.selected.title?.join(', ') ?? 'Filtro',
+              clearCallback: () {
+                setState(() {
+                  selected = null;
+                  context.get<MyStickersPresenter>().countryFilter(selected);
+                });
+              },
             ),
           );
         },
+        selectedValue: selected ?? [],
         onChange: (selectedValue) {
-          context.get<MyStickersPresenter>().countryFilter(selectedValue.value);
+          setState(() {
+            selected = selectedValue.value;
+          });
+          context.get<MyStickersPresenter>().countryFilter(selected);
         },
         choiceItems: S2Choice.listFrom(
           source: widget.countries.entries
@@ -53,8 +64,13 @@ class _StickerFilterGroupState extends State<StickerFilterGroup> {
 
 class _StickerGroupTile extends StatelessWidget {
   final String label;
+  final VoidCallback clearCallback;
 
-  const _StickerGroupTile({Key? key, required this.label}) : super(key: key);
+  const _StickerGroupTile({
+    Key? key,
+    required this.label,
+    required this.clearCallback,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +86,17 @@ class _StickerGroupTile extends StatelessWidget {
         child: Row(children: [
           const Icon(Icons.filter_list),
           const SizedBox(width: 5),
-          Text(
-            label,
-            style: context.textStyles.textSecondaryFontRegular
-                .copyWith(fontSize: 11),
+          Expanded(
+            child: Text(
+              label,
+              style: context.textStyles.textSecondaryFontRegular
+                  .copyWith(fontSize: 11),
+            ),
           ),
+          InkWell(
+            onTap: clearCallback,
+            child: const Icon(Icons.clear),
+          )
         ]),
       ),
     );
